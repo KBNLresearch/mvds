@@ -91,14 +91,17 @@ avg_hum = hum_all / (index + 1)
 
 json_out['avg_temp'] = round(avg_temp, 2)
 json_out['avg_hum'] = round(avg_hum, 2)
+json_out['timestamp'] = str(datetime.now())
 
 pprint(json_out)
 
+
+end_time = end_time.replace(',', '_')
 
 # Write out streetnames
 with open('locations.json', 'w') as fh:
     fh.write(json.dumps(locations))
 
 # Write out cleaned data
-with open("meetjestad.json", "w") as fh:
+with open("meetjestad_" + end_time + ".json", "w") as fh:
     fh.write(json.dumps(json_out))
