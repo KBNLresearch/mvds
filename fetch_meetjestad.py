@@ -13,6 +13,12 @@ from geopy.geocoders import Nominatim
    Clean it and add streetnames to the data.
 '''
 
+DATA_DIR = 'data' + os.path.sep
+
+# Create datadir if not there.
+if not os.path.isdir(DATA_DIR):
+    os.mkdir(DATA_DIR)
+
 # Remote uses different timezone.
 now = datetime.now()
 start = now - timedelta(hours=2.5)
@@ -29,7 +35,7 @@ URL1 += "cmd=download+JSON"
 url = URL % (start_time, end_time) + URL1
 resp = requests.get(url)
 
-# File with street-names.
+# Cache for streetname lookups
 locations = {}
 if os.path.isfile('locations.json'):
     with open('locations.json') as fh:
@@ -103,5 +109,5 @@ with open('locations.json', 'w') as fh:
     fh.write(json.dumps(locations))
 
 # Write out cleaned data
-with open("meetjestad_" + end_time + ".json", "w") as fh:
+with open(DATA_DIR + "meetjestad_" + end_time + ".json", "w") as fh:
     fh.write(json.dumps(json_out))

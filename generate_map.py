@@ -82,8 +82,8 @@ y_orig = np.asarray(df.latitude.tolist())
 z_orig = np.asarray(df.temperature.tolist())
 
 # Make a grid
-x_arr          = np.linspace(np.min(x_orig), np.max(x_orig), 100)
-y_arr          = np.linspace(np.min(y_orig), np.max(y_orig), 100)
+x_arr          = np.linspace(np.min(x_orig), np.max(x_orig), 1000)
+y_arr          = np.linspace(np.min(y_orig), np.max(y_orig), 1000)
 x_mesh, y_mesh = np.meshgrid(x_arr, y_arr)
 
 
@@ -92,23 +92,22 @@ z_mesh = griddata((x_orig, y_orig), z_orig, (x_mesh, y_mesh), method='linear')
 
 
 # Gaussian filter the grid to make it smoother
-sigma = [25, 25]
-z_mesh = sp.ndimage.filters.gaussian_filter(z_mesh, sigma, mode='constant')
-print(df)
+#sigma = [4, 4]
+#z_mesh = sp.ndimage.filters.gaussian_filter(z_mesh, sigma, mode='constant')
 
 # Create the contour
-contourf = plt.contourf(x_mesh, y_mesh, z_mesh, levels, alpha=0.2, colors=colors, linestyles='None', vmin=vmin, vmax=vmax)
+contourf = plt.contourf(x_mesh, y_mesh, z_mesh, levels, alpha=0.4, colors=colors, linestyles='None', vmin=vmin, vmax=vmax)
 
 # Convert matplotlib contourf to geojson
 geojson = geojsoncontour.contourf_to_geojson(
     contourf=contourf,
-    min_angle_deg=3.0,
+    min_angle_deg=6.0,
     ndigits=5,
-    stroke_width=1,
+    stroke_width=3,
     fill_opacity=0.5)
 
 # Set up the folium plot
-geomap = folium.Map([df.latitude.mean(), df.longitude.mean()], zoom_start=12, tiles="cartodbpositron")
+geomap = folium.Map([df.latitude.mean(), df.longitude.mean()], zoom_start=14, tiles="cartodbpositron")
 
 # Plot the contour plot on folium
 folium.GeoJson(
