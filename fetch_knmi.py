@@ -49,15 +49,14 @@ out = {}
 for item in data.get('stations'):
     station = item.get('station')
 
-    try:
-        item.get('temperature')
-    except:
+    if not item.get('temperature'):
         continue
 
     out[station] = {}
     out[station]["name"] = station
-    out[station]["temp"] = item.get('temperature')
-    out[station]["hum"] = item.get('humidity')
+
+    out[station]["temp"] = float(item.get('temperature'))
+    out[station]["hum"] = float(item.get('humidity'))
 
 
     lat = lon = False
@@ -67,8 +66,8 @@ for item in data.get('stations'):
             lat = loc.split(',')[0]
             lon = loc.split(',')[1]
 
-            out[station]["lat"] = lat
-            out[station]["lon"] = lon
+            out[station]["lat"] = float(lat)
+            out[station]["lon"] = float(lon)
             break
 
     # Figure out lat/lon for KNMI-stations.

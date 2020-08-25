@@ -21,9 +21,18 @@ import statistics
 import json
 import numpy
 
-infile = "meetjestad_2020-08-24_13:55.json"
+infile = "data/meetjestad_2020-08-25_13:46.json"
 with open(infile, 'r') as fh:
-    data = json.loads(fh.read())
+    data1 = json.loads(fh.read())
+
+infile = "data/knmi_2020-08-25_13:49.json"
+with open(infile, 'r') as fh:
+    data2 = json.loads(fh.read())
+
+data = {}
+data.update(data1)
+data.update(data2)
+
 
 all_temp = []
 seen = {}
@@ -33,9 +42,10 @@ points = []
 #DataFrame(columns=('lib', 'qty1', 'qty2'))
 
 for item in data:
-    if not item.isnumeric():
+    try:
+        lat = data.get(item).get('lat')
+    except:
         continue
-    lat = data.get(item).get('lat')
     lon = data.get(item).get('lon')
     temp = round(data.get(item).get('temp'), 2)
     print(lat, lon, temp)
@@ -92,8 +102,8 @@ z_mesh = griddata((x_orig, y_orig), z_orig, (x_mesh, y_mesh), method='linear')
 
 
 # Gaussian filter the grid to make it smoother
-#sigma = [4, 4]
-#z_mesh = sp.ndimage.filters.gaussian_filter(z_mesh, sigma, mode='constant')
+sigma = [4, 4]
+z_mesh = sp.ndimage.filters.gaussian_filter(z_mesh, sigma, mode='constant')
 
 # Create the contour
 contourf = plt.contourf(x_mesh, y_mesh, z_mesh, levels, alpha=0.4, colors=colors, linestyles='None', vmin=vmin, vmax=vmax)
@@ -113,10 +123,10 @@ geomap = folium.Map([df.latitude.mean(), df.longitude.mean()], zoom_start=14, ti
 folium.GeoJson(
     geojson,
     style_function=lambda x: {
-        'color':     x['properties']['stroke'],
-        'weight':    x['properties']['stroke-width'],
+        'color': x['properties']['stroke'],
+        'weight': x['properties']['stroke-width'],
         'fillColor': x['properties']['fill'],
-        'opacity':   0.3,
+        'opacity': 0.3,
     }).add_to(geomap)
 
 
