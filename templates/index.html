@@ -1,0 +1,21 @@
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+
+<div id="topBar" style='float: left'>
+{%for i in data%}
+{% if i.isdigit() %}
+
+{{ data.get(i).get('name') }}<br>
+
+{% endif %}
+{% endfor %}
+
+</div>
+<div id ="content" style="float: right; width:50%;">
+
+<script>
+$(document).ready( function() {
+	$("#content").load("/map");
+});
+</script>
