@@ -66,8 +66,8 @@ for item in resp.json():
                        'lat': item.get('latitude'),
                        'lon': item.get('longitude'),
                        'name': locations[key],
-                       'temp': item.get('temperature'),
-                       'hum': item.get('humidity')})
+                       'temp': round(item.get('temperature'), 1),
+                       'hum': round(item.get('humidity'), 1)})
 
 # Calculate avg temperature/humidity per sensor station,
 # and overall avg temperature/humidity
@@ -79,10 +79,10 @@ for nr, line in enumerate(parsed):
         json_out[wid] = line
     else:
         line['hum'] += json_out[wid]['hum']
-        line['hum'] = line['hum'] / 2
+        line['hum'] = round(line['hum'] / 2, 1)
 
         line['temp'] += json_out[wid]['temp']
-        line['temp'] = line['temp'] / 2
+        line['temp'] = round(line['temp'] / 2, 1)
 
         json_out[wid] = line
 
@@ -95,8 +95,8 @@ for index, line in enumerate(json_out):
 avg_temp = temp_all / (index + 1)
 avg_hum = hum_all / (index + 1)
 
-json_out['avg_temp'] = round(avg_temp, 2)
-json_out['avg_hum'] = round(avg_hum, 2)
+json_out['avg_temp'] = round(avg_temp, 1)
+json_out['avg_hum'] = round(avg_hum, 1)
 json_out['timestamp'] = str(datetime.now())
 
 pprint(json_out)

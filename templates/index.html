@@ -1,15 +1,47 @@
 <head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
+<h2 style='float:right; margin-right: 60%;'>
+Monitor van de Stad
+</h2>
+
+<img src="https://gids.bibliotheek.nl/index.php?cmd=thumb&width=215&url=https://gids-files.bibliotheek.nl/producten/P6606045/FutureLab%20Dutch%20Technology%20Week%202019_by%20Steph%20Byrne_110719_010.jpg">
+<br>
+
+<center>Temperatuur overzicht Tilburg.</center>
+
+<h5 style='float: right; margin-right: 20%'>
+Meting opgehaald:
+{{ data.get('timestamp').split('.')[0][:-3] }}
+</h5>
+<br>
+<br>
 
 <div id="topBar" style='float: left'>
+
+<table id="temp" class="tablesorter" style='margin-left: 20%; width: 100%'>
+  <thead>
+    <tr>
+      <th>Naam</th>
+      <th>Temperatuur</th>
+    </tr>
+  </thead>
+  <tbody>
+
 {%for i in data%}
 {% if i.isdigit() %}
-
-{{ data.get(i).get('name') }}<br>
-
+ <tr>
+    <td>
+        {{ data.get(i).get('name') }}
+    </td>
+    <td>
+        {{ data.get(i).get('temp') }}
+    </td>
+  </tr>
 {% endif %}
 {% endfor %}
+ </tbody>
+</table>
 
 </div>
 <div id ="content" style="float: right; width:50%;">

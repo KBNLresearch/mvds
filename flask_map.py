@@ -133,7 +133,7 @@ def map():
         fill_opacity=0.5)
 
     # Set up the folium plot
-    lat = 51.54899230769231
+    lat = 51.55899230769231
     lon = 5.0862053846153847
     geomap = folium.Map([lat, lon], zoom_start=13, tiles="cartodbpositron")
 
