@@ -28,17 +28,22 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    infile = (sorted(glob.glob('data/meetjestad_*.json'), key=os.path.getmtime)[-1])
-    #infile = "data/meetjestad_2020-08-25_13:46.json"
+    # The index renders the landings-page.
+    # Stylesheets in templates/
+    infile = (sorted(glob.glob('data/meetjestad_*.json'),
+                     key=os.path.getmtime)[-1])
+
     with open(infile, 'r') as fh:
         data = json.loads(fh.read())
 
     return render_template('index.html', data=data)
 
-@app.route('/map')
-def map():
-    infile = (sorted(glob.glob('data/meetjestad_*.json'), key=os.path.getmtime)[-1])
-    #infile = "data/meetjestad_2020-08-25_13:46.json"
+
+@app.route('/temp_map')
+def temp_map():
+    infile = (sorted(glob.glob('data/meetjestad_*.json'),
+                     key=os.path.getmtime)[-1])
+    # infile = "data/meetjestad_2020-08-25_13:46.json"
     with open(infile, 'r') as fh:
         data1 = json.loads(fh.read())
 

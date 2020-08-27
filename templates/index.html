@@ -1,25 +1,37 @@
 <head>
+<link rel="stylesheet" href="https://www.innovatiebieb.nl/template/bnltpl_v2/css/themix.css" type="text/css" title="webfonts" />
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<style type="text/css">
+
+html{overflow-x:hidden;float:left;width:100%;font-size:75%;background-color:#efefef}
+
+</style>
 </head>
-<h2 style='float:right; margin-right: 60%;'>
+
+<img src="https://www.innovatiebieb.nl/index.php?cmd=file&file=52&action=open&width=">
+<h2 style='float:right; margin-right: 60%; font-family: "TheMix", Arial, sans-serif; font-size: 52.8px; float: right; margin-right: 30%; color: #FF7320;'>
 Monitor van de Stad
 </h2>
+<br style='clear: both;'>
 
-<img src="https://gids.bibliotheek.nl/index.php?cmd=thumb&width=215&url=https://gids-files.bibliotheek.nl/producten/P6606045/FutureLab%20Dutch%20Technology%20Week%202019_by%20Steph%20Byrne_110719_010.jpg">
+<img src="https://gids.bibliotheek.nl/index.php?cmd=thumb&width=215&url=https://gids-files.bibliotheek.nl/producten/P6606045/FutureLab%20Dutch%20Technology%20Week%202019_by%20Steph%20Byrne_110719_010.jpg" style="float: left;">
 <br>
 
-<center>Temperatuur overzicht Tilburg.</center>
-
-<h5 style='float: right; margin-right: 20%'>
-Meting opgehaald:
-{{ data.get('timestamp').split('.')[0][:-3] }}
-</h5>
+<h2 style='float:right; margin-right: 60%; font-family: "TheMix", Arial, sans-serif; font-size: 42.8px; float: right; margin-right: 40%'>
+    Temperatuur overzicht.
+</h2>
 <br>
+<br style='clear: both'>
 <br>
+<div style='width: 600px; background: #fff; margin: 20px; padding: 20px;'>
 
-<div id="topBar" style='float: left'>
+De onderstaande gegevens zijn opgehaald op
+{{ data.get('timestamp').split('.')[0][:-3] }}. De gegevens zijn afkomstig van een combinatie van bronnen, te weten <a href="https://meetjestad.net/">Meet je stad</a> en <a href="https://www.knmi.nl/">KNMI</a>. Naast de temperatuur pagina is ook een <a href="hum/">luchtvochtigheids</a> pagina beschikbaar. Onderstaande tabel en kaart tonen de temperatuur in °<b>C</b>.
+</div>
 
-<table id="temp" class="tablesorter" style='margin-left: 20%; width: 100%'>
+<div id="topBar" style='float: left;'>
+
+<table id="temp" class="tablesorter" style='width: 100%'>
   <thead>
     <tr>
       <th>Naam</th>
@@ -37,6 +49,7 @@ Meting opgehaald:
     <td>
         {{ data.get(i).get('temp') }}
     </td>
+    <!-- <img src="https://meetjestad.net/node/series.php?id={{ i }}&time=1&series=temperature">{{i}} --!>
   </tr>
 {% endif %}
 {% endfor %}
@@ -44,10 +57,10 @@ Meting opgehaald:
 </table>
 
 </div>
-<div id ="content" style="float: right; width:50%;">
+<div id ="content" style="float: right; width:50%; padding: 40px;">
 
 <script>
 $(document).ready( function() {
-	$("#content").load("/map");
+	$("#content").load("/temp_map");
 });
 </script>
