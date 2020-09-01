@@ -21,7 +21,7 @@ Monitor van de Stad
 <br>
 
 <h2 style='float:right; margin-right: 60%; font-family: "TheMix", Arial, sans-serif; font-size: 42.8px; float: right; margin-right: 40%'>
-    Temperatuur overzicht.
+    Luchtvochtigheids overzicht.
 </h2>
 <br>
 <br style='clear: both'>
@@ -32,7 +32,7 @@ Monitor van de Stad
 
 
 De onderstaande gegevens zijn opgehaald op
-{{ data.get('timestamp').split('.')[0][:-3] }}. De gegevens zijn afkomstig van een combinatie van bronnen, te weten <a href="https://meetjestad.net/">Meet je stad</a> en <a href="https://www.knmi.nl/">KNMI</a>. Naast de temperatuur pagina is ook een <a href="hum.html">luchtvochtigheids</a> pagina beschikbaar. Onderstaande tabel en kaart tonen de temperatuur in °<b>C</b>.
+{{ data.get('timestamp').split('.')[0][:-3] }}. De gegevens zijn afkomstig van een combinatie van bronnen, te weten <a href="https://meetjestad.net/">Meet je stad</a> en <a href="https://www.knmi.nl/">KNMI</a>. Naast de luchtvochtigheids pagina is ook een <a href="/">temperatuur</a> pagina beschikbaar. Onderstaande tabel en kaart tonen de luchtvochtigheidsgraad.
 
 </div>
 
@@ -42,7 +42,7 @@ De onderstaande gegevens zijn opgehaald op
   <thead>
     <tr>
       <th>Naam</th>
-      <th>Temperatuur</th>
+      <th>Luchtvochtigheid</th>
     </tr>
   </thead>
   <tbody>
@@ -54,7 +54,7 @@ De onderstaande gegevens zijn opgehaald op
         {{ data.get(i).get('name') }}
     </td>
     <td>
-        {{ data.get(i).get('temp') }}
+        {{ data.get(i).get('hum') }}
     </td>
     <!-- <img src="https://meetjestad.net/node/series.php?id={{ i }}&time=1&series=temperature">{{i}} --!>
   </tr>
@@ -70,7 +70,7 @@ De onderstaande gegevens zijn opgehaald op
 
 <script>
 $(document).ready( function() {
-	$("#content").load("/temp_map.html");
+	$("#content").load("/hum_map.html");
 });
 </script>
 </html>
