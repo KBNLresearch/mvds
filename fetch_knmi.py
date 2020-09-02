@@ -54,7 +54,7 @@ for item in data.get('stations'):
     if not item.get('temperature'):
         continue
 
-    if not station in wanted:
+    if station not in wanted:
         continue
 
     out[station] = {}
@@ -62,7 +62,6 @@ for item in data.get('stations'):
 
     out[station]["temp"] = float(item.get('temperature'))
     out[station]["hum"] = float(item.get('humidity'))
-
 
     lat = lon = False
     # Use cache for locations.

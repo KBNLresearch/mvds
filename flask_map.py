@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+#
+# Generate a html map / frontend for monitor van de stad.
+# Based upon:
+# https://github.com/python-visualization/folium/issues/958
+#
 
 import os
+import sys
+
+import glob
 import json
 import numpy
-import glob
 
 import branca
 import folium
@@ -38,6 +45,7 @@ def index():
 
     return render_template('index.html', data=data)
 
+
 @app.route('/hum.html')
 def hum():
     # The index renders the landings-page.
@@ -51,10 +59,10 @@ def hum():
     return render_template('hum.html', data=data)
 
 
-
 @app.route('/temp_map.html')
 def temp_map():
     return map()
+
 
 @app.route('/hum_map.html')
 def hum_map():
@@ -62,17 +70,38 @@ def hum_map():
 
 
 def map(map_name="temp"):
-    infile = (sorted(glob.glob('data/meetjestad_*.json'),
-                     key=os.path.getmtime)[-1])
-    # infile = "data/meetjestad_2020-08-25_13:46.json"
-    with open(infile, 'r') as fh:
-        data1 = json.loads(fh.read())
+    # Load datasource meetjestad, with fallback to older files,
+    # in case of corruption
+    i = -1
+    data1 = False
+    while not data1:
+        infile = (sorted(glob.glob('data/meetjestad_*.json'),
+                  key=os.path.getmtime)[i])
+        with open(infile, 'r') as fh:
+            try:
+                data1 = json.loads(fh.read())
+            except Exception:
+                i -= 1
+                if i < -10:
+                    sys.stdout.write("Failed to load KNMI data from:" + infile)
+                    sys.exit(-1)
 
-    infile = (sorted(glob.glob('data/knmi_*.json'), key=os.path.getmtime)[-1])
-    with open(infile, 'r') as fh:
-        data2 = json.loads(fh.read())
+    # Load datasource KNMI, with fallback to older files,
+    # in case of corruption
+    i = -1
+    data2 = False
+    while not data2:
+        infile = (sorted(glob.glob('data/knmi_*.json'),
+                  key=os.path.getmtime)[i])
+        with open(infile, 'r') as fh:
+            try:
+                data2 = json.loads(fh.read())
+            except Exception:
+                i -= 1
+                if i < -10:
+                    sys.stdout.write("Failed to load KNMI data from:" + infile)
+                    sys.exit(-1)
 
-    #data2 = {}
     data = {}
     data.update(data1)
     data.update(data2)
@@ -81,6 +110,7 @@ def map(map_name="temp"):
     seen = {}
     points = []
 
+    # Extract wanted data from json files
     for item in data:
         try:
             lat = data.get(item).get('lat')
@@ -104,9 +134,11 @@ def map(map_name="temp"):
                     points.append([lat, lon, round(hum, 2)])
 
     if map_name == "temp":
-        df = pd.DataFrame(points, columns=('latitude', 'longitude', 'temperature'))
+        df = pd.DataFrame(points,
+                          columns=('latitude', 'longitude', 'temperature'))
     elif map_name == "hum":
-        df = pd.DataFrame(points, columns=('latitude', 'longitude', 'humidity'))
+        df = pd.DataFrame(points,
+                          columns=('latitude', 'longitude', 'humidity'))
 
     for item in seen:
         all_temp.append(seen[item])
@@ -117,7 +149,6 @@ def map(map_name="temp"):
     debug = False
 
     # Setup colormap
-    '''
     colors = [
               '#1b23ba',
               '#2b83ba',
@@ -128,18 +159,18 @@ def map(map_name="temp"):
               '#e2191c',
               '#ff0000'
     ]
-    '''
 
+    '''
     colors = []
     def rgb_to_hex(rgb):
         return '#%02x%02x%02x' % rgb
 
-    for i in range(0,255,int(255 / 7)):
+    for i in range(0,255,int(255 / 8)):
         colors.append(rgb_to_hex((i, 0 , 255-i)))
-
-    vmin = temp_mean - 2.5 * temp_std
-    vmax = temp_mean + 2.5 * temp_std
-    levels = len(colors)
+    '''
+    vmin = temp_mean - 1 * temp_std
+    vmax = temp_mean + 1 * temp_std
+    levels = len(colors) - 1
     cm = branca.colormap.LinearColormap(colors,
                                         vmin=vmin,
                                         vmax=vmax).to_step(levels)
@@ -154,12 +185,15 @@ def map(map_name="temp"):
         z_orig = np.asarray(df.humidity.tolist())
 
     # Make a grid
-    x_arr = np.linspace(np.min(x_orig), np.max(x_orig), 1500)
-    y_arr = np.linspace(np.min(y_orig), np.max(y_orig), 1500)
+    x_arr = np.linspace(np.min(x_orig), np.max(x_orig), 500)
+    y_arr = np.linspace(np.min(y_orig), np.max(y_orig), 500)
     x_mesh, y_mesh = np.meshgrid(x_arr, y_arr)
 
     # Grid the values
-    z_mesh = griddata((x_orig, y_orig), z_orig, (x_mesh, y_mesh), method='linear')
+    z_mesh = griddata((x_orig, y_orig),
+                      z_orig,
+                      (x_mesh, y_mesh),
+                      method='linear')
 
     # Gaussian filter the grid to make it smoother
     sigma = [2, 2]
@@ -199,7 +233,7 @@ def map(map_name="temp"):
             'opacity': 0.5,
         }).add_to(geomap)
 
-
+    # Add measurestations to the map.
     for p in points:
         lat = p[0]
         lon = p[1]
@@ -211,7 +245,6 @@ def map(map_name="temp"):
                             html='<div style="font-size: 15pt">'
                                  + temp + '</div>',)
                           ).add_to(geomap)
-
 
     # Add the colormap to the folium map
     if map_name == "temp":
