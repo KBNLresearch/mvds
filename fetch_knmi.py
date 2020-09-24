@@ -44,7 +44,7 @@ with codecs.open(DATA_DIR + dst_filename, 'wb') as fh:
 with codecs.open(DATA_DIR + dst_filename, 'rb') as fh:
     data = json.loads(fh.read())
 
-wanted = ["Eindhoven", "Volkel", "Woensdrecht", "Rotterdam"]
+#wanted = ["Eindhoven", "Volkel", "Woensdrecht", "Rotterdam"]
 
 out = {}
 
@@ -54,8 +54,8 @@ for item in data.get('stations'):
     if not item.get('temperature'):
         continue
 
-    if station not in wanted:
-        continue
+    #if station not in wanted:
+    #    continue
 
     out[station] = {}
     out[station]["name"] = station

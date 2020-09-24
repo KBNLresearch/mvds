@@ -23,6 +23,7 @@ import pandas as pd
 import scipy as sp
 import scipy.ndimage
 import statistics
+import geojson
 
 from flask import Flask, render_template
 from folium.features import DivIcon
@@ -43,7 +44,13 @@ def index():
     with open(infile, 'r') as fh:
         data = json.loads(fh.read())
 
-    return render_template('index.html', data=data)
+    infile = (sorted(glob.glob('data/knmi*.json'),
+                     key=os.path.getmtime)[-1])
+
+    with open(infile, 'r') as fh:
+        knmi = json.loads(fh.read())
+
+    return render_template('index.html', data=data, knmi=knmi)
 
 
 @app.route('/hum.html')
@@ -104,7 +111,15 @@ def map(map_name="temp"):
 
     data = {}
     data.update(data1)
-    data.update(data2)
+    from pprint import pprint
+    pprint(data2)
+
+    wanted = ["Eindhoven", "Volkel", "Woensdrecht", "Rotterdam"]
+
+    for item in data2:
+        if item not in wanted:
+            continue
+        data.update({item: data2[item]})
 
     all_temp = []
     seen = {}
@@ -157,7 +172,7 @@ def map(map_name="temp"):
               '#fdae61',
               '#d7191c',
               '#e2191c',
-              '#ff0000'
+              '#ff0000',
     ]
 
     '''
@@ -168,12 +183,15 @@ def map(map_name="temp"):
     for i in range(0,255,int(255 / 8)):
         colors.append(rgb_to_hex((i, 0 , 255-i)))
     '''
-    vmin = temp_mean - 1 * temp_std
-    vmax = temp_mean + 1 * temp_std
-    levels = len(colors) - 1
+
+    vmin = temp_mean - 2 * temp_std
+    vmax = temp_mean + 2 * temp_std
+    levels = len(colors) 
     cm = branca.colormap.LinearColormap(colors,
                                         vmin=vmin,
                                         vmax=vmax).to_step(levels)
+    print(vmin, vmax, levels)
+
 
     # The original data
     x_orig = np.asarray(df.longitude.tolist())
@@ -185,8 +203,8 @@ def map(map_name="temp"):
         z_orig = np.asarray(df.humidity.tolist())
 
     # Make a grid
-    x_arr = np.linspace(np.min(x_orig), np.max(x_orig), 500)
-    y_arr = np.linspace(np.min(y_orig), np.max(y_orig), 500)
+    x_arr = np.linspace(np.min(x_orig), np.max(x_orig), 1500)
+    y_arr = np.linspace(np.min(y_orig), np.max(y_orig), 1500)
     x_mesh, y_mesh = np.meshgrid(x_arr, y_arr)
 
     # Grid the values
@@ -221,17 +239,43 @@ def map(map_name="temp"):
     # Set up the folium plot
     lat = 51.55899230769231
     lon = 5.0862053846153847
-    geomap = folium.Map([lat, lon], zoom_start=13, tiles="cartodbpositron")
+    #geomap = folium.Map([lat, lon], zoom_start=13, tiles="cartodbpositron")
+    geomap = folium.Map([lat, lon], zoom_start=13) #, tiles="cartodbpositron")
+
+    #folium.GeoJson(
+    #    'buurten.json',
+    #    name='geojson'
+    #).add_to(geomap)
+
+    with open('buurten.json', 'r') as fh:
+        buurten=fh.read()
+
+    #folium.TopoJson(
+    #    json.loads(buurten),
+    #    'test',
+    #    name='topojson'
+    #).add_to(geomap)
+    folium.GeoJson('out1.json',
+                    style_function=lambda x: {
+                        'color': '#222222',
+                        'fillColor': '#222222', 
+                        'opacity': 0.5,
+                    }).add_to(geomap)
+
+
+    style = {'fillColor': '#ffffff', 'color': '#002200', 'opacity': 0.3}
+    folium.GeoJson('out.json',
+                    style_function=lambda x: {
+                        'color': cm(x['properties']['temp']),
+                        'fillColor': cm(x['properties']['temp']),
+                        'opacity': 1,
+                    }).add_to(geomap)
+
 
     # Plot the contour plot on folium
-    folium.GeoJson(
-        geojson,
-        style_function=lambda x: {
-            'color': x['properties']['stroke'],
-            'weight': x['properties']['stroke-width'],
-            'fillColor': x['properties']['fill'],
-            'opacity': 0.5,
-        }).add_to(geomap)
+    #folium.GeoJson(
+    #    geojson,
+    #    ).add_to(geomap)
 
     # Add measurestations to the map.
     for p in points:
@@ -253,6 +297,7 @@ def map(map_name="temp"):
         cm.caption = 'Luchtvochtigheid'
 
     geomap.add_child(cm)
+    folium.LayerControl().add_to(geomap)
 
     # Fullscreen mode
     plugins.Fullscreen(position='topright',

@@ -47,18 +47,16 @@ De onderstaande gegevens zijn opgehaald op
   </thead>
   <tbody>
 
-{%for i in data%}
-{% if i.isdigit() %}
+{%for i in knmi%}
  <tr>
     <td>
-        {{ data.get(i).get('name') }}
+        {{ knmi.get(i).get('name') }}
     </td>
     <td>
-        {{ data.get(i).get('temp') }}
+        {{ knmi.get(i).get('temp') }}
     </td>
     <!-- <img src="https://meetjestad.net/node/series.php?id={{ i }}&time=1&series=temperature">{{i}} --!>
   </tr>
-{% endif %}
 {% endfor %}
  </tbody>
 </table>

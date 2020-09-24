@@ -62,12 +62,15 @@ for item in resp.json():
                 location_str = location.address.split(',')[0].strip()
             locations[key] = location_str
 
-        parsed.append({'id': item.get('id'),
-                       'lat': item.get('latitude'),
-                       'lon': item.get('longitude'),
-                       'name': locations[key],
-                       'temp': round(item.get('temperature'), 1),
-                       'hum': round(item.get('humidity'), 1)})
+        try:
+            parsed.append({'id': item.get('id'),
+                           'lat': item.get('latitude'),
+                           'lon': item.get('longitude'),
+                           'name': locations[key],
+                           'temp': round(item.get('temperature'), 1),
+                           'hum': round(item.get('humidity'), 1)})
+        except:
+            pass
 
 # Calculate avg temperature/humidity per sensor station,
 # and overall avg temperature/humidity

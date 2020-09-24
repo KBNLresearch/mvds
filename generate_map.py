@@ -115,7 +115,8 @@ geojson = geojsoncontour.contourf_to_geojson(
 # Set up the folium plot
 lat = 51.56899230769231
 lon = 5.0862053846153845
-geomap = folium.Map([lat, lon], zoom_start=14, tiles="cartodbpositron")
+geomap = folium.Map([lat, lon], zoom_start=14, titles=None)
+#tiles="cartodbpositron",  tiles=None)
 
 # Plot the contour plot on folium
 folium.GeoJson(
@@ -126,6 +127,24 @@ folium.GeoJson(
         'fillColor': x['properties']['fill'],
         'opacity': 0.3,
     }).add_to(geomap)
+
+
+folium.GeoJson(
+    'test',
+    name='geojson'
+).add_to(geomap)
+
+
+with open('buurten.json', 'r') as fh:
+    buurten=fh.read()
+
+folium.TopoJson(
+    json.loads(buurten),
+    'test',
+    name='topojson'
+).add_to(geomap)
+
+
 
 
 for p in points:
