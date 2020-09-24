@@ -95,7 +95,7 @@ def map(map_name="temp"):
 
     # Load datasource KNMI, with fallback to older files,
     # in case of corruption
-    i = -1
+    i = 1
     data2 = False
     while not data2:
         infile = (sorted(glob.glob('data/knmi_*.json'),
@@ -104,16 +104,13 @@ def map(map_name="temp"):
             try:
                 data2 = json.loads(fh.read())
             except Exception:
-                i -= 1
-                if i < -10:
+                i += 1
+                if i > 9:
                     sys.stdout.write("Failed to load KNMI data from:" + infile)
                     sys.exit(-1)
 
     data = {}
     data.update(data1)
-    from pprint import pprint
-    pprint(data2)
-
     wanted = ["Eindhoven", "Volkel", "Woensdrecht", "Rotterdam"]
 
     for item in data2:
@@ -150,10 +147,14 @@ def map(map_name="temp"):
 
     if map_name == "temp":
         df = pd.DataFrame(points,
-                          columns=('latitude', 'longitude', 'temperature'))
+                          columns=('latitude',
+                                   'longitude',
+                                   'temperature'))
     elif map_name == "hum":
         df = pd.DataFrame(points,
-                          columns=('latitude', 'longitude', 'humidity'))
+                          columns=('latitude',
+                                   'longitude',
+                                   'humidity'))
 
     for item in seen:
         all_temp.append(seen[item])
@@ -161,7 +162,6 @@ def map(map_name="temp"):
     # Setup
     temp_mean = numpy.mean(all_temp)
     temp_std = statistics.stdev(all_temp)
-    debug = False
 
     # Setup colormap
     colors = [
@@ -175,24 +175,12 @@ def map(map_name="temp"):
               '#ff0000',
     ]
 
-    '''
-    colors = []
-    def rgb_to_hex(rgb):
-        return '#%02x%02x%02x' % rgb
-
-    for i in range(0,255,int(255 / 8)):
-        colors.append(rgb_to_hex((i, 0 , 255-i)))
-    '''
-
     vmin = temp_mean - 2 * temp_std
     vmax = temp_mean + 2 * temp_std
-    levels = len(colors) 
+    levels = len(colors)
     cm = branca.colormap.LinearColormap(colors,
                                         vmin=vmin,
                                         vmax=vmax).to_step(levels)
-    print(vmin, vmax, levels)
-
-
     # The original data
     x_orig = np.asarray(df.longitude.tolist())
     y_orig = np.asarray(df.latitude.tolist())
@@ -239,24 +227,19 @@ def map(map_name="temp"):
     # Set up the folium plot
     lat = 51.55899230769231
     lon = 5.0862053846153847
-    #geomap = folium.Map([lat, lon], zoom_start=13, tiles="cartodbpositron")
-    geomap = folium.Map([lat, lon], zoom_start=13) #, tiles="cartodbpositron")
-
-    #folium.GeoJson(
-    #    'buurten.json',
-    #    name='geojson'
-    #).add_to(geomap)
+    geomap = folium.Map([lat, lon], zoom_start=13, title='mvds')
 
     with open('buurten.json', 'r') as fh:
-        buurten=fh.read()
+        buurten = fh.read()
 
-    #folium.TopoJson(
+    # folium.TopoJson(
     #    json.loads(buurten),
     #    'test',
     #    name='topojson'
-    #).add_to(geomap)
+    # ).add_to(geomap)
+
     folium.GeoJson('out1.json',
-                    style_function=lambda x: {
+                    style_function = lambda x: {
                         'color': '#222222',
                         'fillColor': '#222222', 
                         'opacity': 0.5,
@@ -271,9 +254,8 @@ def map(map_name="temp"):
                         'opacity': 1,
                     }).add_to(geomap)
 
-
     # Plot the contour plot on folium
-    #folium.GeoJson(
+    # folium.GeoJson(
     #    geojson,
     #    ).add_to(geomap)
 
@@ -297,7 +279,8 @@ def map(map_name="temp"):
         cm.caption = 'Luchtvochtigheid'
 
     geomap.add_child(cm)
-    folium.LayerControl().add_to(geomap)
+
+    # folium.LayerControl().add_to(geomap)
 
     # Fullscreen mode
     plugins.Fullscreen(position='topright',
