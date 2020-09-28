@@ -3,9 +3,13 @@
 
 #
 # Generate a html map / frontend for monitor van de stad.
+#
 # Based upon:
 # https://github.com/python-visualization/folium/issues/958
 #
+# Later diveded the map into neighbourhoods, and calculated the avg. temp.
+# Commented out code was used for a inperpolating map,
+# harder to do with polygons..
 
 import os
 import sys
@@ -20,15 +24,15 @@ import folium
 # import geojsoncontour
 # import matplotlib.pyplot as plt
 
-import numpy as np
-import pandas as pd
-import scipy as sp
+# import numpy as np
+# import pandas as pd
+# import scipy as sp
 import statistics
 
 from flask import Flask, render_template
 from folium.features import DivIcon
 from folium import plugins
-from scipy.interpolate import griddata
+# from scipy.interpolate import griddata
 
 app = Flask(__name__)
 
@@ -144,6 +148,7 @@ def map(map_name="temp"):
                     seen[key] = round(hum, 2)
                     points.append([lat, lon, round(hum, 2)])
 
+    '''
     if map_name == "temp":
         df = pd.DataFrame(points,
                           columns=('latitude',
@@ -154,6 +159,7 @@ def map(map_name="temp"):
                           columns=('latitude',
                                    'longitude',
                                    'humidity'))
+    '''
 
     for item in seen:
         all_temp.append(seen[item])
@@ -174,12 +180,14 @@ def map(map_name="temp"):
               '#ff0000',
     ]
 
-    vmin = temp_mean - 2 * temp_std
-    vmax = temp_mean + 2 * temp_std
+    vmin = temp_mean - 1 * temp_std
+    vmax = temp_mean + 1 * temp_std
     levels = len(colors)
     cm = branca.colormap.LinearColormap(colors,
                                         vmin=vmin,
                                         vmax=vmax).to_step(levels)
+    '''
+
     # The original data
     x_orig = np.asarray(df.longitude.tolist())
     y_orig = np.asarray(df.latitude.tolist())
@@ -204,7 +212,6 @@ def map(map_name="temp"):
     sigma = [2, 2]
     z_mesh = sp.ndimage.filters.gaussian_filter(z_mesh, sigma, mode='constant')
 
-    '''
     # Create the contour
     contourf = plt.contourf(x_mesh,
                             y_mesh,
@@ -230,7 +237,9 @@ def map(map_name="temp"):
     # Set up the folium plot
     lat = 51.55899230769231
     lon = 5.0862053846153847
-    geomap = folium.Map([lat, lon], zoom_start=13, title='mvds')
+    geomap = folium.Map([lat, lon],
+                        zoom_start=13,
+                        title='mvds')
 
     '''
     folium.TopoJson(
@@ -254,7 +263,6 @@ def map(map_name="temp"):
                         'fillColor': cm(x['properties']['temp']),
                         'opacity': 1,
                     }).add_to(geomap)
-
 
     '''
     # Plot the contour plot on folium
