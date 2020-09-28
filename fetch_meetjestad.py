@@ -69,7 +69,7 @@ for item in resp.json():
                            'name': locations[key],
                            'temp': round(item.get('temperature'), 1),
                            'hum': round(item.get('humidity'), 1)})
-        except:
+        except Exception:
             pass
 
 # Calculate avg temperature/humidity per sensor station,

@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 
 import os
-import sys
 import json
 import codecs
 
 from datetime import datetime
 from ftplib import FTP
-from geopy.geocoders import Nominatim
 
 '''
     Fetch latest data from KNMI.
     Clean it and add lat / lon to the data.
+    Convert placenames to provincenames.
 '''
 
 KNMI_FTP = 'ftp.knmi.nl'
@@ -44,7 +43,41 @@ with codecs.open(DATA_DIR + dst_filename, 'wb') as fh:
 with codecs.open(DATA_DIR + dst_filename, 'rb') as fh:
     data = json.loads(fh.read())
 
-#wanted = ["Eindhoven", "Volkel", "Woensdrecht", "Rotterdam"]
+place_to_prov = {"Lauwersoog": "Groningen",
+                 "Nieuw Beerta": "Groningen",
+                 "Terschelling": "Friesland",
+                 "Vlieland": "Friesland",
+                 "Leeuwarden": "Friesland",
+                 "Stavoren": "Friesland",
+                 "Eelde": "Drenthe",
+                 "Hoogeveen": "Drenthe",
+                 "Heino": "Overijssel",
+                 "Twente": "Overijssel",
+                 "Deelen": "Gelderland",
+                 "Hupsel": "Gelderland",
+                 "Herwijnen": "Gelderland",
+                 "Marknesse": "Flevoland",
+                 "Lelystad": "Flevoland",
+                 "De Bilt": "Utrecht",
+                 "Cabauw": "Utrecht",
+                 "Den Helder": "Noord-Holland",
+                 "Berkhout": "Noord-Holland",
+                 "Schiphol": "Noord-Holland",
+                 "Voorschoten": "Zuid-Holland",
+                 "Rotterdam": "Zuid-Holland",
+                 "Hoek van Holland": "Zuid-Holland",
+                 "Wilhelminadorp": "Zeeland",
+                 "Vlissingen": "Zeeland",
+                 "Westdorpe": "Zeeland",
+                 "Woensdrecht": "Noord-Brabant",
+                 "Gilze Rijen": "Noord-Brabant",
+                 "Volkel": "Noord-Brabant",
+                 "Eindhoven": "Noord-Brabant",
+                 "Ell": "Limburg",
+                 "Arcen": "Limburg",
+                 "Maastricht-Aachen Airport": "Limburg",
+                 "Wijk aan Zee": "Noord-Holland",
+                 }
 
 out = {}
 
@@ -54,41 +87,23 @@ for item in data.get('stations'):
     if not item.get('temperature'):
         continue
 
-    #if station not in wanted:
-    #    continue
+    print(station)
 
-    out[station] = {}
-    out[station]["name"] = station
+    if station in place_to_prov:
+        station = place_to_prov.get(station)
 
-    out[station]["temp"] = float(item.get('temperature'))
-    out[station]["hum"] = float(item.get('humidity'))
+    print(station)
 
-    lat = lon = False
-    # Use cache for locations.
-    for loc, name in locations.items():
-        if name == station:
-            lat = loc.split(',')[0]
-            lon = loc.split(',')[1]
-
-            out[station]["lat"] = float(lat)
-            out[station]["lon"] = float(lon)
-            break
-
-    # Figure out lat/lon for KNMI-stations.
-    if not (lat or lon):
-        geolocator = Nominatim()
-        location = geolocator.geocode(station)
-
-        if location:
-            lat = location.latitude
-            lon = location.longitude
-
-            out[station]["lat"] = lat
-            out[station]["lon"] = lon
-            locations[str(lat) + "," + str(lon)] = station
+    if station not in out:
+        out[station] = {}
+        out[station]["name"] = station
+        out[station]["temp"] = float(item.get('temperature'))
+        out[station]["hum"] = float(item.get('humidity'))
+    else:
+        out[station]["temp"] = round(((out[station]["temp"] +
+                                       float(item.get('temperature'))) / 2), 1)
+        out[station]["hum"] = round(((out[station]["hum"] +
+                                      float(item.get('humidity'))) / 2), 1)
 
 with open(DATA_DIR + dst_filename, 'w') as fh:
     fh.write(json.dumps(out))
-
-with open('locations.json', 'w') as fh:
-    fh.write(json.dumps(locations))

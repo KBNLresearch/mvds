@@ -16,19 +16,18 @@ import numpy
 
 import branca
 import folium
-import geojsoncontour
-import matplotlib.pyplot as plt
+
+# import geojsoncontour
+# import matplotlib.pyplot as plt
+
 import numpy as np
 import pandas as pd
 import scipy as sp
-import scipy.ndimage
 import statistics
-import geojson
 
 from flask import Flask, render_template
 from folium.features import DivIcon
 from folium import plugins
-from pprint import pprint
 from scipy.interpolate import griddata
 
 app = Flask(__name__)
@@ -205,6 +204,7 @@ def map(map_name="temp"):
     sigma = [2, 2]
     z_mesh = sp.ndimage.filters.gaussian_filter(z_mesh, sigma, mode='constant')
 
+    '''
     # Create the contour
     contourf = plt.contourf(x_mesh,
                             y_mesh,
@@ -215,7 +215,9 @@ def map(map_name="temp"):
                             linestyles='None',
                             vmin=vmin,
                             vmax=vmax)
+    '''
 
+    '''
     # Convert matplotlib contourf to geojson
     geojson = geojsoncontour.contourf_to_geojson(
         contourf=contourf,
@@ -223,41 +225,43 @@ def map(map_name="temp"):
         ndigits=4,
         stroke_width=1,
         fill_opacity=0.3)
+    '''
 
     # Set up the folium plot
     lat = 51.55899230769231
     lon = 5.0862053846153847
     geomap = folium.Map([lat, lon], zoom_start=13, title='mvds')
 
-    with open('buurten.json', 'r') as fh:
-        buurten = fh.read()
-
-    # folium.TopoJson(
-    #    json.loads(buurten),
-    #    'test',
-    #    name='topojson'
-    # ).add_to(geomap)
+    '''
+    folium.TopoJson(
+       json.loads(buurten),
+       'test',
+       name='topojson'
+    ).add_to(geomap)
+    '''
 
     folium.GeoJson('out1.json',
-                    style_function = lambda x: {
-                        'color': '#222222',
-                        'fillColor': '#222222', 
-                        'opacity': 0.5,
-                    }).add_to(geomap)
+                   style_function=lambda x: {
+                    'color': '#222222',
+                    'fillColor': '#222222',
+                    'opacity': 0.5,
+                   }).add_to(geomap)
 
-
-    style = {'fillColor': '#ffffff', 'color': '#002200', 'opacity': 0.3}
+    # style = {'fillColor': '#ffffff', 'color': '#002200', 'opacity': 0.3}
     folium.GeoJson('out.json',
-                    style_function=lambda x: {
+                   style_function=lambda x: {
                         'color': cm(x['properties']['temp']),
                         'fillColor': cm(x['properties']['temp']),
                         'opacity': 1,
                     }).add_to(geomap)
 
+
+    '''
     # Plot the contour plot on folium
-    # folium.GeoJson(
-    #    geojson,
-    #    ).add_to(geomap)
+    folium.GeoJson(
+        geojson,
+    ).add_to(geomap)
+    '''
 
     # Add measurestations to the map.
     for p in points:

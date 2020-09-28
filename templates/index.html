@@ -47,7 +47,7 @@ De onderstaande gegevens zijn opgehaald op
   </thead>
   <tbody>
 
-{%for i in knmi%}
+{%for i, j in knmi.items()|sort(attribute='0') %}
  <tr>
     <td>
         {{ knmi.get(i).get('name') }}
